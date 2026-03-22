@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import { Github } from "lucide-react";
 
 export default function Home() {
   return (
