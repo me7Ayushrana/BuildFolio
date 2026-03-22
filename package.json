@@ -1,0 +1,14 @@
+{
+    "name": "buildfolio",
+    "version": "1.0.0",
+    "description": "Premium Developer Portfolio & Showcase Platform",
+    "private": true,
+    "scripts": {
+        "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+        "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+        "build": "npm run build --prefix client && npm run build --prefix server"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
