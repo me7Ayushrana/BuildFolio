@@ -38,29 +38,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-    // Sync firebase user with backend on auth state change
+    // Sync firebase user with backend — non-blocking, with timeout
     const syncUserWithBackend = async (firebaseUser: User) => {
         try {
             const idToken = await firebaseUser.getIdToken();
             setToken(idToken);
+            setUser(firebaseUser);
 
             // Save to localStorage for cross-tab persistence
             if (typeof window !== "undefined") {
                 localStorage.setItem("bf_token", idToken);
             }
 
-            const res = await axios.post(
-                `${API_URL}/auth/sync`,
-                {},
-                { headers: { Authorization: `Bearer ${idToken}` } }
-            );
-            setDbUser(res.data.user);
-            setUser(firebaseUser);
+            // Don't block on backend sync — use a 5s timeout
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 5000);
+
+            try {
+                const res = await axios.post(
+                    `${API_URL}/auth/sync`,
+                    {},
+                    {
+                        headers: { Authorization: `Bearer ${idToken}` },
+                        signal: controller.signal,
+                        timeout: 5000,
+                    }
+                );
+                clearTimeout(timeout);
+                setDbUser(res.data.user);
+            } catch (syncErr) {
+                clearTimeout(timeout);
+                console.log("Backend sync skipped (server warming up)");
+                // Still set user — auth works without backend sync
+            }
         } catch (error) {
-            console.error("Error syncing user with backend:", error);
+            console.error("Error in auth flow:", error);
+            // Even if token fetch fails, still set the user
             setUser(firebaseUser);
-            const idToken = await firebaseUser.getIdToken();
-            setToken(idToken);
         }
     };
 
@@ -105,7 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const loginWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+            // onAuthStateChanged will handle the rest
         } catch (error) {
             console.error("Google login failed:", error);
             throw error;
@@ -171,7 +186,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         try {
             const res = await axios.get(`${API_URL}/users/dev`, {
-                headers: { Authorization: `Bearer ${devToken}` }
+                headers: { Authorization: `Bearer ${devToken}` },
+                timeout: 5000,
             });
             setDbUser(res.data);
             setUser({
