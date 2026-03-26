@@ -18,7 +18,16 @@ import socialRoutes from './routes/social.js';
 import socialActionRoutes from './routes/social_actions.js';
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: [
+        'https://build-folio-sigma.vercel.app',
+        'https://buildfolio.vercel.app',
+        /\.vercel\.app$/,
+        'http://localhost:3000',
+        'http://localhost:3001'
+    ],
+    credentials: true
+}));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
