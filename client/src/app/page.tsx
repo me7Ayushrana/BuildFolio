@@ -38,12 +38,20 @@ export default function HomePage() {
       if (res.data && res.data.length > 0) {
         setProjects(res.data);
       } else {
-        // Fallback to premium data only for global
-        setProjects(tab === 'global' ? PREMIUM_PROJECTS : []);
+        // Fallback to premium data with derived counts
+        setProjects(tab === 'global' ? PREMIUM_PROJECTS.map(p => ({
+          ...p,
+          likesCount: p.likes?.length || 0,
+          commentsCount: p.comments?.length || 0,
+        })) : []);
       }
     } catch (err) {
       console.error('Error fetching projects:', err);
-      setProjects(tab === 'global' ? PREMIUM_PROJECTS : []);
+      setProjects(tab === 'global' ? PREMIUM_PROJECTS.map(p => ({
+        ...p,
+        likesCount: p.likes?.length || 0,
+        commentsCount: p.comments?.length || 0,
+      })) : []);
     } finally {
       setLoading(false);
     }
