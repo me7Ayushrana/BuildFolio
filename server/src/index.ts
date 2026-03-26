@@ -14,6 +14,8 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/users.js';
 import projectRoutes from './routes/projects.js';
 import exploreRoutes from './routes/explore.js';
+import socialRoutes from './routes/social.js';
+import socialActionRoutes from './routes/social_actions.js';
 
 // Middleware
 app.use(cors());
@@ -26,6 +28,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/explore', exploreRoutes);
+app.use('/api/social', socialRoutes);
+app.use('/api/social-actions', socialActionRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Buildfolio API is running...');

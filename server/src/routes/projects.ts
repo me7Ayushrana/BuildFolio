@@ -5,6 +5,48 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
+// Get all projects with optional interaction status
+router.get('/', async (req: any, res: any) => {
+    try {
+        const authHeader = req.headers.authorization;
+        let currentUser = null;
+
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            // We can't easily use the 'authenticate' middleware here as it throws 401
+            // So we just try to get the user if possible
+            try {
+                const admin = (await import('firebase-admin')).default;
+                const decodedToken = await admin.auth().verifyIdToken(token);
+                currentUser = await User.findOne({ firebaseId: decodedToken.uid });
+            } catch (err) {
+                // Token invalid or expired, proceed as guest
+            }
+        }
+
+        const projects = await Project.find()
+            .populate('userId', 'username displayName photoURL')
+            .sort({ createdAt: -1 })
+            .limit(50);
+
+        const projectsWithStatus = projects.map(project => {
+            const projectObj = project.toObject();
+            return {
+                ...projectObj,
+                isLiked: currentUser ? project.likes.some(id => id.toString() === currentUser?._id.toString()) : false,
+                isSaved: currentUser ? currentUser.savedProjects.some(id => id.toString() === project._id.toString()) : false,
+                likesCount: project.likes.length,
+                commentsCount: project.comments.length
+            };
+        });
+
+        return res.status(200).json(projectsWithStatus);
+    } catch (error) {
+        console.error('Error fetching projects:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 // Get all projects for a specific user
 router.get('/user/:username', async (req, res) => {
     try {

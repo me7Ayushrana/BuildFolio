@@ -15,6 +15,15 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
     const token = authHeader.split('Bearer ')[1];
 
+    // DEV MODE BYPASS
+    if (process.env.NODE_ENV === 'development' && token === 'dev-token') {
+        const devUser = await User.findOne({ username: 'dev' }) || await User.findOne({});
+        if (devUser) {
+            req.user = { uid: devUser.firebaseId, email: devUser.email };
+            return next();
+        }
+    }
+
     try {
         const decodedToken = await authAdmin.verifyIdToken(token!);
         const user = await User.findOne({ firebaseId: decodedToken.uid });

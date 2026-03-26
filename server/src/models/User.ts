@@ -9,6 +9,9 @@ export interface IUser extends Document {
     bio?: string;
     skills: string[];
     githubUsername?: string;
+    followers: mongoose.Types.ObjectId[];
+    following: mongoose.Types.ObjectId[];
+    savedProjects: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -22,6 +25,11 @@ const UserSchema: Schema = new Schema({
     bio: { type: String },
     skills: [{ type: String }],
     githubUsername: { type: String },
+    followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    savedProjects: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
 }, { timestamps: true });
+
+UserSchema.index({ username: 'text', displayName: 'text' });
 
 export default mongoose.model<IUser>('User', UserSchema);

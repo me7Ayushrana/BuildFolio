@@ -8,6 +8,13 @@ export interface IProject extends Document {
     imageUrl?: string;
     githubLink: string;
     liveLink?: string;
+    likes: mongoose.Types.ObjectId[];
+    comments: {
+        _id?: mongoose.Types.ObjectId;
+        userId: mongoose.Types.ObjectId;
+        text: string;
+        createdAt: Date;
+    }[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -20,6 +27,12 @@ const ProjectSchema: Schema = new Schema({
     imageUrl: { type: String },
     githubLink: { type: String, required: true },
     liveLink: { type: String },
+    likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    comments: [{
+        userId: { type: Schema.Types.ObjectId, ref: 'User' },
+        text: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now }
+    }]
 }, { timestamps: true });
 
 export default mongoose.model<IProject>('Project', ProjectSchema);
