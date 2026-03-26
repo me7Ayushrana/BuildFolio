@@ -6,8 +6,10 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { Rocket, Github, Globe, Code2, Plus, Loader2, X, Image as ImageIcon } from "lucide-react";
 
+
 export default function CreateProjectModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-    const { token } = useAuth();
+    const { token, dbUser } = useAuth();
+    const [step, setStep] = useState(1);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [techStack, setTechStack] = useState("");
@@ -19,8 +21,7 @@ export default function CreateProjectModal({ isOpen, onClose }: { isOpen: boolea
 
     const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/api';
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async () => {
         setIsSubmitting(true);
         setError("");
 
@@ -30,176 +31,214 @@ export default function CreateProjectModal({ isOpen, onClose }: { isOpen: boolea
                 {
                     title,
                     description,
-                    techStack: techStack.split(",").map(s => s.trim()),
+                    techStack: techStack.split(",").map(s => s.trim()).filter(s => s),
                     imageUrl,
                     githubLink,
                     liveLink
                 },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            onClose();
-            // Clear form
-            setTitle("");
-            setDescription("");
-            setTechStack("");
-            setImageUrl("");
-            setGithubLink("");
-            setLiveLink("");
-            window.location.reload(); // Refresh to show new project
+
+            // Success animation/feedback would go here
+            setTimeout(() => {
+                onClose();
+                // Reset
+                setStep(1);
+                setTitle("");
+                setDescription("");
+                setTechStack("");
+                setImageUrl("");
+                setGithubLink("");
+                setLiveLink("");
+                window.location.reload();
+            }, 1000);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to create project");
-        } finally {
+            setError(err.response?.data?.message || "Launch Aborted: Technical Error");
             setIsSubmitting(false);
         }
     };
 
+    const nextStep = () => setStep(s => Math.min(s + 1, 3));
+    const prevStep = () => setStep(s => Math.max(s - 1, 1));
+
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+                        className="fixed inset-0 bg-black/90 backdrop-blur-md"
                     />
 
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        initial={{ opacity: 0, scale: 0.9, y: 40 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-2xl rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl my-auto"
+                        exit={{ opacity: 0, scale: 0.9, y: 40 }}
+                        className="relative w-full max-w-5xl h-[85vh] rounded-[2.5rem] border border-white/5 bg-zinc-950 shadow-2xl overflow-hidden flex flex-col md:flex-row"
                     >
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-
-                        <div className="p-8">
-                            <div className="flex items-center justify-between mb-8">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
-                                        <Rocket size={24} />
+                        {/* Left Side: Form */}
+                        <div className="flex-1 p-8 md:p-12 overflow-y-auto custom-scrollbar border-r border-white/5 bg-zinc-950">
+                            <div className="mb-8">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex gap-1">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className={`h-1 rounded-full transition-all duration-500 ${step >= i ? 'w-6 bg-blue-500' : 'w-2 bg-zinc-800'}`} />
+                                        ))}
                                     </div>
-                                    <h2 className="text-2xl font-bold text-white tracking-tight">Share Your Build</h2>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 ml-2">Step {step} of 3</span>
                                 </div>
-                                <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                                    <X size={20} className="text-zinc-500" />
-                                </button>
+                                <h2 className="text-3xl font-black text-white tracking-tighter">
+                                    {step === 1 && "The Concept"}
+                                    {step === 2 && "The Visuals"}
+                                    {step === 3 && "Final Mission Check"}
+                                </h2>
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-6">
-                                        {/* Title */}
+                            <div className="space-y-8">
+                                {step === 1 && (
+                                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Project Title</label>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Project Mission Title</label>
                                             <input
+                                                autoFocus
                                                 type="text"
-                                                required
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
-                                                placeholder="e.g. ChatGPT-5 Architecture"
-                                                className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 px-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light"
+                                                placeholder="e.g. Neural Nexus Engine"
+                                                className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 px-5 text-xl text-white placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-black tracking-tight"
                                             />
                                         </div>
-
-                                        {/* Description */}
                                         <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Breakdown</label>
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Technical Breakdown</label>
                                             <textarea
-                                                required
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
-                                                placeholder="What technical challenges did you solve?"
-                                                rows={4}
-                                                className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 px-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light resize-none"
+                                                placeholder="Describe the architectural breakthrough..."
+                                                rows={5}
+                                                className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 px-5 text-zinc-300 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all resize-none font-medium leading-relaxed"
                                             />
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-6">
-                                        {/* Image URL */}
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Hero Image URL</label>
-                                            <div className="relative group">
-                                                <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
-                                                <input
-                                                    type="url"
-                                                    value={imageUrl}
-                                                    onChange={(e) => setImageUrl(e.target.value)}
-                                                    placeholder="Unsplash or Cloudinary link"
-                                                    className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Tech Stack */}
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Core Stack (comma separated)</label>
-                                            <div className="relative group">
-                                                <Code2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
-                                                <input
-                                                    type="text"
-                                                    value={techStack}
-                                                    onChange={(e) => setTechStack(e.target.value)}
-                                                    placeholder="PyTorch, Next.js, CUDA"
-                                                    className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Github */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Source Code (Optional)</label>
-                                        <div className="relative group">
-                                            <Github className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
-                                            <input
-                                                type="url"
-                                                value={githubLink}
-                                                onChange={(e) => setGithubLink(e.target.value)}
-                                                placeholder="github.com/..."
-                                                className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Live Link */}
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Live Demo (Optional)</label>
-                                        <div className="relative group">
-                                            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-blue-500 transition-colors" />
-                                            <input
-                                                type="url"
-                                                value={liveLink}
-                                                onChange={(e) => setLiveLink(e.target.value)}
-                                                placeholder="https://..."
-                                                className="w-full bg-zinc-950 border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-light"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {error && (
-                                    <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-                                        <X size={16} /> {error}
-                                    </div>
+                                    </motion.div>
                                 )}
 
-                                <button
-                                    type="submit"
-                                    disabled={isSubmitting || !title || !description}
-                                    className="w-full py-4 rounded-2xl bg-white text-black font-extrabold text-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98] shadow-2xl shadow-white/5 flex items-center justify-center gap-3 mt-4"
-                                >
-                                    {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : (
-                                        <>
-                                            <Plus size={24} /> Deploy to Feed
-                                        </>
-                                    )}
-                                </button>
-                            </form>
+                                {step === 2 && (
+                                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Hero Image URL</label>
+                                            <input
+                                                type="url"
+                                                value={imageUrl}
+                                                onChange={(e) => setImageUrl(e.target.value)}
+                                                placeholder="Unsplash / Cloudinary / GitHub raw"
+                                                className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 px-5 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-mono text-xs"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Core Tech Stack (Comma Separated)</label>
+                                            <input
+                                                type="text"
+                                                value={techStack}
+                                                onChange={(e) => setTechStack(e.target.value)}
+                                                placeholder="Rust, CUDA, PyTorch, Go..."
+                                                className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 px-5 text-zinc-200 placeholder:text-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all font-black tracking-widest uppercase text-xs"
+                                            />
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {step === 3 && (
+                                    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">GitHub</label>
+                                                <input
+                                                    type="url"
+                                                    value={githubLink}
+                                                    onChange={(e) => setGithubLink(e.target.value)}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-3 px-4 text-xs text-zinc-400 font-mono"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Live Demo</label>
+                                                <input
+                                                    type="url"
+                                                    value={liveLink}
+                                                    onChange={(e) => setLiveLink(e.target.value)}
+                                                    className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-3 px-4 text-xs text-zinc-400 font-mono"
+                                                />
+                                            </div>
+                                        </div>
+                                        {error && <p className="text-red-400 text-xs font-black uppercase tracking-widest">{error}</p>}
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            <div className="mt-12 flex items-center gap-4">
+                                {step > 1 && (
+                                    <button onClick={prevStep} className="px-8 py-4 rounded-2xl border border-white/5 text-zinc-500 hover:text-white hover:bg-white/5 transition-all text-sm font-black uppercase tracking-widest">
+                                        Back
+                                    </button>
+                                )}
+                                {step < 3 ? (
+                                    <button
+                                        onClick={nextStep}
+                                        disabled={step === 1 && (!title || !description)}
+                                        className="flex-1 py-4 rounded-2xl bg-blue-600 text-white font-black text-sm uppercase tracking-[0.2em] hover:bg-blue-500 disabled:opacity-30 transition-all active:scale-95"
+                                    >
+                                        Next Phase
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleSubmit}
+                                        disabled={isSubmitting}
+                                        className="flex-1 py-4 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all active:scale-95 shadow-2xl shadow-white/10 flex items-center justify-center gap-3"
+                                    >
+                                        {isSubmitting ? <Loader2 className="animate-spin" /> : <><Rocket size={20} /> Initiate Launch</>}
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
+                        {/* Right Side: Live Preview */}
+                        <div className="hidden md:flex flex-1 p-12 items-center justify-center bg-zinc-900/50 relative overflow-hidden group">
+                            {/* Animated Background Gradients */}
+                            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -mr-64 -mt-64 group-hover:bg-blue-500/20 transition-colors duration-1000" />
+                            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] -ml-64 -mb-64 group-hover:bg-purple-500/20 transition-colors duration-1000" />
+
+                            <div className="w-full max-w-sm relative z-10">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 block mb-6 text-center">Live Holographic Preview</span>
+
+                                {/* Card Mockup */}
+                                <div className="bg-zinc-950/80 border border-white/10 rounded-[2rem] overflow-hidden backdrop-blur-3xl shadow-2xl">
+                                    <div className="p-4 border-b border-white/5 flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+                                        <div className="h-2 w-24 bg-zinc-800 rounded" />
+                                    </div>
+                                    <div className="aspect-[16/10] bg-zinc-900 relative overflow-hidden">
+                                        {imageUrl ? <img src={imageUrl} className="w-full h-full object-cover" /> : <div className="absolute inset-0 flex items-center justify-center text-zinc-800 font-black uppercase tracking-widest text-[10px]">No Media Connection</div>}
+                                    </div>
+                                    <div className="p-6 space-y-4">
+                                        <div className="space-y-2">
+                                            <h4 className="text-xl font-black text-white leading-none tracking-tight">{title || "Launch Target Alpha"}</h4>
+                                            <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{description || "The technical details of your breakthrough development will appear here..."}</p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {(techStack || "Buildfolio").split(",").map((t, i) => (
+                                                <div key={i} className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/5 text-[8px] font-black text-zinc-500 uppercase tracking-widest">{t.trim() || "?"}</div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Top Close Button */}
+                        <button onClick={onClose} className="absolute top-6 right-6 p-2 text-zinc-600 hover:text-white transition-colors z-[110]">
+                            <X size={24} />
+                        </button>
                     </motion.div>
                 </div>
             )}

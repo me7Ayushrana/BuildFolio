@@ -16,6 +16,23 @@ router.get('/trending', async (req, res) => {
     }
 });
 
+// Get trending builders (Discovery Hub)
+router.get('/trending-builders', async (req, res) => {
+    try {
+        const builders = await User.find({
+            $or: [
+                { role: { $exists: true, $ne: "" } },
+                { bio: { $exists: true, $ne: "" } }
+            ]
+        })
+            .sort({ followers: -1 })
+            .limit(10);
+        res.status(200).json(builders);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+});
+
 // Search users
 router.get('/search', async (req, res) => {
     const { query } = req.query;
@@ -65,7 +82,7 @@ router.get('/:username', async (req, res) => {
 // Update own profile
 router.put('/profile', authenticate, async (req: AuthRequest, res) => {
     const firebaseUser = req.user;
-    const { username, displayName, bio, skills, githubUsername, photoURL } = req.body;
+    const { username, displayName, bio, skills, githubUsername, photoURL, role, goals, onboarded } = req.body;
 
     try {
         const existingUser = await User.findOne({ firebaseId: firebaseUser.uid });
@@ -87,6 +104,9 @@ router.put('/profile', authenticate, async (req: AuthRequest, res) => {
         if (skills !== undefined) existingUser.skills = skills;
         if (githubUsername !== undefined) existingUser.githubUsername = githubUsername;
         if (photoURL !== undefined) existingUser.photoURL = photoURL;
+        if (role !== undefined) existingUser.role = role;
+        if (goals !== undefined) existingUser.goals = goals;
+        if (onboarded !== undefined) existingUser.onboarded = onboarded;
 
         await existingUser.save();
         return res.status(200).json({ message: 'Profile updated', user: existingUser });

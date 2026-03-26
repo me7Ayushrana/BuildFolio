@@ -15,7 +15,7 @@ function Connection({ start, end }: { start: [number, number, number]; end: [num
     const lineGeometry = useMemo(() => new THREE.BufferGeometry().setFromPoints(points), [points]);
 
     return (
-        // @ts-ignore — Three.js <line> conflicts with SVG <line> in JSX types
+        // @ts-expect-error — Three.js <line> conflicts with SVG <line> in JSX types
         <line geometry={lineGeometry}>
             <lineBasicMaterial attach="material" color="#3b82f6" opacity={0.2} transparent linewidth={1} />
         </line>

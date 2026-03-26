@@ -17,13 +17,18 @@ import {
     MessageCircle,
     BadgeCheck,
     Users,
-    UserPlus
+    UserPlus,
+    X,
+    Maximize2,
+    Sparkles
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import FollowButton from "@/components/FollowButton";
 import UserListModal from "@/components/UserListModal";
+import RepoGalaxyView from "@/components/RepoGalaxyView";
+import { generateGraphData } from "@/lib/graphUtils";
 import Image from "next/image";
 
 export default function ProfilePage() {
@@ -40,6 +45,9 @@ export default function ProfilePage() {
     // Modal state
     const [isListModalOpen, setIsListModalOpen] = useState(false);
     const [listModalType, setListModalType] = useState<'followers' | 'following'>('followers');
+    const [isGalaxyOpen, setIsGalaxyOpen] = useState(false);
+    const [galaxyData, setGalaxyData] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
+    const [isGalaxyLoading, setIsGalaxyLoading] = useState(false);
 
     useEffect(() => {
         if (username) fetchProfileData();
@@ -94,28 +102,84 @@ export default function ProfilePage() {
         setIsListModalOpen(true);
     };
 
-    if (loading) return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-                <div className="h-10 w-10 animate-spin rounded-full border-t-2 border-blue-500"></div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Compiling Engineer Intelligence</p>
+    const toggleGalaxy = async () => {
+        if (isGalaxyOpen) {
+            setIsGalaxyOpen(false);
+            return;
+        }
+
+        if (repos.length === 0) {
+            toast.error("No repositories found to visualize");
+            return;
+        }
+
+        setIsGalaxyOpen(true);
+        if (galaxyData.nodes.length > 0) return;
+
+        setIsGalaxyLoading(true);
+        try {
+            const primaryRepo = repos[0];
+            const defaultBranch = primaryRepo.default_branch || "main";
+            const treeRes = await axios.get(`https://api.github.com/repos/${profile.githubUsername}/${primaryRepo.name}/git/trees/${defaultBranch}?recursive=1`);
+
+            const filteredTree = treeRes.data.tree
+                .filter((item: any) => item.type === "blob" || item.type === "tree")
+                .slice(0, 200);
+
+            const { nodes, edges } = generateGraphData(filteredTree);
+            setGalaxyData({ nodes, edges });
+        } catch (err) {
+            console.error(err);
+            toast.error("Interlink failed: Unable to fetch repository mapping");
+            setIsGalaxyOpen(false);
+        } finally {
+            setIsGalaxyLoading(false);
+        }
+    };
+
+    const isOwnProfile = dbUser && (dbUser.username === username || dbUser.firebaseId === profile?.firebaseId);
+
+    // Skeleton Component
+    const ProfileSkeleton = () => (
+        <div className="min-h-screen bg-slate-950 text-white pb-24 animate-pulse">
+            <Navbar />
+            <div className="mx-auto max-w-5xl px-4 pt-28">
+                <div className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-20 mb-20 bg-slate-900/10 p-8 rounded-[40px] border border-white/5">
+                    <div className="h-40 w-40 md:h-52 md:w-52 rounded-full bg-zinc-900" />
+                    <div className="flex-1 space-y-6 pt-4 w-full">
+                        <div className="h-10 w-48 bg-zinc-900 rounded-xl" />
+                        <div className="flex gap-8">
+                            <div className="h-12 w-20 bg-zinc-900 rounded-lg" />
+                            <div className="h-12 w-20 bg-zinc-900 rounded-lg" />
+                            <div className="h-12 w-20 bg-zinc-900 rounded-lg" />
+                        </div>
+                        <div className="h-4 w-full max-w-md bg-zinc-900 rounded" />
+                    </div>
+                </div>
             </div>
         </div>
     );
 
-    if (!profile) return (
+    if (loading && !profile) return <ProfileSkeleton />;
+
+    if (!profile && !loading) return (
         <div className="min-h-screen bg-slate-950 text-white flex flex-col">
             <Navbar />
             <div className="flex-1 flex items-center justify-center">
-                <h1 className="text-2xl font-black uppercase tracking-tighter">Profile Offline</h1>
+                <div className="text-center space-y-4">
+                    <h1 className="text-3xl font-black uppercase tracking-tighter text-zinc-800">Decryption Failed</h1>
+                    <p className="text-zinc-600 font-mono text-xs uppercase tracking-widest">Profile not found in secure archives</p>
+                </div>
             </div>
         </div>
     );
 
-    const isOwnProfile = dbUser && (dbUser.username === username || dbUser.firebaseId === profile.firebaseId);
-
     return (
-        <div className="min-h-screen bg-slate-950 text-white pb-24">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="min-h-screen bg-slate-950 text-white pb-24"
+        >
             <Navbar />
 
             <div className="mx-auto max-w-5xl px-4 pt-28">
@@ -282,6 +346,67 @@ export default function ProfilePage() {
                 userId={profile._id}
                 type={listModalType}
             />
-        </div>
+
+            {/* Immersive Galaxy Overlay */}
+            <AnimatePresence>
+                {isGalaxyOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-zinc-950 flex flex-col"
+                    >
+                        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950/80 backdrop-blur-md">
+                            <div className="flex items-center gap-4">
+                                <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500">
+                                    <Sparkles size={20} />
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="text-sm font-black uppercase italic tracking-tighter text-white">Neural Repository Mapping</h3>
+                                    <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Visualizing {repos[0]?.name || "Archive"}</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsGalaxyOpen(false)}
+                                className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-white transition-all ring-1 ring-white/10"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 relative">
+                            {isGalaxyLoading ? (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-zinc-950">
+                                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                                    <div className="text-center">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500 animate-pulse">Syncing Neural Nodes</p>
+                                        <p className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest mt-2">Deep Architectural Scan in Progress</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <RepoGalaxyView nodes={galaxyData.nodes} edges={galaxyData.edges} />
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Floating Immersive Toggle */}
+            {profile.githubUsername && (
+                <motion.button
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.05, y: -2 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleGalaxy}
+                    className="fixed bottom-10 right-10 z-40 flex items-center gap-3 pl-4 pr-6 py-4 rounded-full bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest shadow-[0_20px_50px_rgba(37,99,235,0.4)] hover:shadow-[0_25px_60px_rgba(37,99,235,0.6)] transition-all ring-4 ring-slate-950 group"
+                >
+                    <div className="p-1.5 rounded-lg bg-white/20 group-hover:bg-white/30 transition-colors">
+                        <Sparkles size={16} className="fill-current" />
+                    </div>
+                    <span>Immersive View</span>
+                </motion.button>
+            )}
+        </motion.div>
     );
 }

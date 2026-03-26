@@ -136,104 +136,119 @@ export default function ProjectFeedCard({ project: initialProject }: ProjectFeed
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.5 }}
-            className="bg-slate-900/40 border border-slate-800/60 rounded-2xl overflow-hidden backdrop-blur-sm group hover:border-blue-500/30 hover:bg-slate-900/60 transition-all duration-300"
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative group bg-slate-900/30 border border-white/5 rounded-[2rem] overflow-hidden backdrop-blur-md hover:border-blue-500/20 hover:bg-slate-900/50 transition-all duration-500 shadow-2xl shadow-black/40"
         >
+            {/* Subtle Inner Glow */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             {/* Header */}
-            <div className="p-4 flex items-center justify-between border-b border-slate-800/10">
-                <Link href={`/profile/${authorUsername}`} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700 relative group-hover:border-blue-500/50 transition-colors">
+            <div className="p-5 flex items-center justify-between border-b border-white/5 relative z-10">
+                <Link href={`/profile/${authorUsername}`} className="flex items-center gap-3 group/author">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center overflow-hidden border border-white/5 relative group-hover/author:border-blue-500/40 transition-all duration-300 scale-95 group-hover/author:scale-100">
                         {authorPhoto ? (
-                            <Image
-                                src={authorPhoto}
-                                alt={authorDisplayName}
-                                fill
-                                className="object-cover"
-                            />
+                            <Image src={authorPhoto} alt={authorDisplayName} fill className="object-cover" />
                         ) : (
-                            <User size={20} className="text-slate-400" />
+                            <User size={24} className="text-slate-500" />
                         )}
+                        <div className="absolute inset-0 bg-blue-500/10 opacity-0 group-hover/author:opacity-100 transition-opacity" />
                     </div>
                     <div className="flex flex-col">
                         <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-sm group-hover:text-blue-400 transition-colors uppercase tracking-tight">
+                            <span className="font-black text-sm text-zinc-100 group-hover/author:text-blue-400 transition-colors uppercase tracking-tight">
                                 {authorDisplayName}
                             </span>
                             {isIconicDeveloper(authorId) && (
-                                <BadgeCheck size={14} className="text-blue-500 fill-current" />
+                                <BadgeCheck size={14} className="text-blue-400 fill-current" />
                             )}
                         </div>
-                        <span className="text-[10px] text-slate-500 font-mono">
+                        <span className="text-[9px] text-zinc-500 font-black uppercase tracking-widest opacity-60">
                             @{authorUsername}
                         </span>
                     </div>
                 </Link>
                 <div className="flex items-center gap-3">
                     <FollowButton targetUserId={authorId} initialIsFollowing={false} variant="mini" />
-                    <button className="text-slate-400 hover:text-white transition-colors">
+                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-all">
                         <MoreHorizontal size={20} />
                     </button>
                 </div>
             </div>
 
             {/* Media Content */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-950">
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-zinc-950/50 group-hover:shadow-[0_0_50px_rgba(59,130,246,0.1)] transition-shadow duration-500">
                 <Image
                     src={project.imageUrl || 'https://images.unsplash.com/photo-1618477388954-7852f32655ec?q=80&w=1000&auto=format&fit=crop'}
                     alt={project.title}
                     width={1000}
                     height={600}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-102"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 blur-[0.5px] group-hover:blur-0"
                     priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500" />
+
+                {/* Explore Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-4 group-hover:translate-y-0 pointer-events-none">
+                    <div className="px-6 py-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-black uppercase tracking-[0.2em] shadow-xl">
+                        Technical Deep Dive
+                    </div>
+                </div>
             </div>
 
             {/* Interactions Bar */}
-            <div className="p-5 flex flex-col gap-4">
+            <div className="p-6 flex flex-col gap-6 relative z-10">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                        <button
+                    <div className="flex items-center gap-6">
+                        <motion.button
+                            whileTap={{ scale: 0.8 }}
                             onClick={toggleLike}
-                            className={`${isLiked ? 'text-red-500' : 'text-slate-300'} hover:text-red-500 transition-colors flex items-center gap-2 group/btn font-mono text-xs`}
+                            className={`${isLiked ? 'text-blue-500' : 'text-zinc-500'} hover:text-blue-400 transition-all flex items-center gap-2 group/btn font-black text-[10px] tracking-widest uppercase`}
                         >
                             <Heart
                                 size={22}
-                                className={`${isLiked ? 'fill-current scale-110' : ''} group-hover/btn:scale-120 transition-transform`}
+                                className={`${isLiked ? 'fill-current' : 'fill-none'} transition-transform duration-300`}
                             />
-                            <span className="font-bold">{likesCount}</span>
-                        </button>
-                        <button
+                            <span>{likesCount}</span>
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.8 }}
                             onClick={() => setShowComments(!showComments)}
-                            className="text-slate-300 hover:text-blue-500 transition-colors flex items-center gap-2 group/btn font-mono text-xs"
+                            className="text-zinc-500 hover:text-blue-400 transition-all flex items-center gap-2 group/btn font-black text-[10px] tracking-widest uppercase"
                         >
-                            <MessageCircle size={22} className="group-hover/btn:scale-120 transition-transform" />
-                            <span className="font-bold">{localComments.length}</span>
-                        </button>
-                        <button className="text-slate-300 hover:text-green-500 transition-colors group/btn">
-                            <Share2 size={22} className="group-hover/btn:scale-120 transition-transform" />
-                        </button>
+                            <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
+                            <span>{localComments.length}</span>
+                        </motion.button>
+                        <motion.button
+                            whileTap={{ scale: 0.8 }}
+                            className="text-zinc-500 hover:text-green-500 transition-all group/btn"
+                        >
+                            <Share2 size={22} className="group-hover:rotate-12 transition-transform" />
+                        </motion.button>
                     </div>
-                    <button
+                    <motion.button
+                        whileTap={{ scale: 0.8 }}
                         onClick={toggleSave}
-                        className={`${isSaved ? 'text-blue-500' : 'text-slate-300'} hover:text-blue-500 transition-colors group/btn`}
+                        className={`${isSaved ? 'text-yellow-500' : 'text-zinc-500'} hover:text-yellow-400 transition-all group/btn`}
                     >
-                        <Bookmark size={22} className={`${isSaved ? 'fill-current scale-110' : ''} group-hover/btn:scale-120 transition-transform`} />
-                    </button>
+                        <Bookmark size={22} className={`${isSaved ? 'fill-current' : 'fill-none'} transition-transform`} />
+                    </motion.button>
                 </div>
 
                 {/* Text Content */}
-                <div className="space-y-1">
-                    <h3 className="text-xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors">{project.title}</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed font-medium line-clamp-2">{project.description}</p>
+                <div className="space-y-2">
+                    <h3 className="text-2xl font-black tracking-tighter text-white group-hover:text-blue-400 transition-colors leading-none">
+                        {project.title}
+                    </h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed font-medium line-clamp-2 selection:bg-blue-500/20">
+                        {project.description}
+                    </p>
                 </div>
 
                 {/* Tech Stack */}
-                <div className="flex flex-wrap gap-2 pt-2">
+                <div className="flex flex-wrap gap-1.5">
                     {project.techStack.map((tech) => (
                         <span
                             key={tech}
-                            className="px-2 py-0.5 rounded bg-blue-500/5 text-blue-400/80 border border-blue-500/10 text-[9px] font-black uppercase tracking-widest"
+                            className="px-3 py-1 rounded-xl bg-zinc-950 border border-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-widest hover:border-blue-500/30 hover:text-white transition-all cursor-default"
                         >
                             {tech}
                         </span>

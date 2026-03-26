@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut, LayoutDashboard, Globe, Zap, Bell, MessageCircle, Sparkles } from "lucide-react";
+import { User, LogOut, LayoutDashboard, Globe, Zap, Bell, MessageCircle, Sparkles, Rocket, BadgeCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import { Search, Loader2 } from 'lucide-react';
@@ -56,6 +56,13 @@ export default function Navbar() {
         return () => clearTimeout(timeoutId);
     }, [searchQuery]);
 
+    // Auto-trigger Onboarding Flow
+    useEffect(() => {
+        if (dbUser && !dbUser.onboarded) {
+            setIsOnboardingOpen(true);
+        }
+    }, [dbUser]);
+
     return (
         <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/70 backdrop-blur-md">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -70,8 +77,13 @@ export default function Navbar() {
                                 Dev Access
                             </button>
                         )}
-                        <Link href="/" className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80 shrink-0">
-                            Build<span className="text-zinc-500">folio</span>
+                        <Link href="/" className="group flex items-center gap-2">
+                            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-300 shadow-lg shadow-blue-500/20">
+                                <Rocket size={18} className="text-white" />
+                            </div>
+                            <h1 className="text-xl font-black tracking-tighter text-white">
+                                Build<span className="text-zinc-500">folio</span>
+                            </h1>
                         </Link>
 
                         {/* Search Bar */}
@@ -86,7 +98,15 @@ export default function Navbar() {
                                     onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
                                     className="w-full bg-zinc-900/50 border border-white/5 rounded-full py-1.5 pl-10 pr-4 text-sm text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:bg-zinc-900 transition-all font-light"
                                 />
-                                {isSearching && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-500 animate-spin" />}
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                                    {isSearching ? (
+                                        <Loader2 className="h-3 w-3 text-zinc-500 animate-spin" />
+                                    ) : (
+                                        <kbd className="hidden sm:block px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] text-zinc-600 font-black">
+                                            ⌘K
+                                        </kbd>
+                                    )}
+                                </div>
                             </div>
 
                             <AnimatePresence>
@@ -105,10 +125,13 @@ export default function Navbar() {
                                                     onClick={() => setShowResults(false)}
                                                     className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-colors group"
                                                 >
-                                                    <img src={result.photoURL || `https://ui-avatars.com/api/?name=${result.displayName}`} alt="" className="w-8 h-8 rounded-full border border-white/10" />
+                                                    <img src={result.photoURL || `https://ui-avatars.com/api/?name=${result.displayName}&background=random`} alt="" className="w-10 h-10 rounded-xl border border-white/5 object-cover" />
                                                     <div className="flex flex-col">
-                                                        <span className="text-sm font-medium text-zinc-200 group-hover:text-white">{result.displayName}</span>
-                                                        <span className="text-xs text-zinc-500">@{result.username}</span>
+                                                        <div className="flex items-center gap-1.5">
+                                                            <span className="text-sm font-black text-zinc-100 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{result.displayName}</span>
+                                                            <BadgeCheck size={12} className="text-blue-500" />
+                                                        </div>
+                                                        <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">@{result.username} • ENGINEER</span>
                                                     </div>
                                                 </Link>
                                             ))}

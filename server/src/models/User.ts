@@ -8,6 +8,9 @@ export interface IUser extends Document {
     photoURL?: string;
     bio?: string;
     skills: string[];
+    role?: string;
+    goals: string[];
+    onboarded: boolean;
     githubUsername?: string;
     followers: mongoose.Types.ObjectId[];
     following: mongoose.Types.ObjectId[];
@@ -24,6 +27,9 @@ const UserSchema: Schema = new Schema({
     photoURL: { type: String },
     bio: { type: String },
     skills: [{ type: String }],
+    role: { type: String },
+    goals: [{ type: String }],
+    onboarded: { type: Boolean, default: false },
     githubUsername: { type: String },
     followers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: Schema.Types.ObjectId, ref: 'User' }],

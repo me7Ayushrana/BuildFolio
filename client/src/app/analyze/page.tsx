@@ -17,12 +17,14 @@ import {
     Search,
     X,
     Maximize2,
-    Folder
+    Folder,
+    Sparkles
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { motion, AnimatePresence } from "framer-motion";
 import RepoSkeletonGraph from "@/components/RepoSkeletonGraph";
 import CodePreviewSidebar from "@/components/CodePreviewSidebar";
+import RepoGalaxyView from "@/components/RepoGalaxyView";
 import { generateGraphData } from "@/lib/graphUtils";
 
 const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"];
@@ -32,7 +34,7 @@ export default function AnalyzePage() {
     const [loading, setLoading] = useState(false);
     const [data, setData] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<"list" | "graph">("graph");
+    const [viewMode, setViewMode] = useState<"list" | "graph" | "galaxy">("graph");
     const [graphData, setGraphData] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
 
     // Search & Sidebar State
@@ -265,6 +267,12 @@ export default function AnalyzePage() {
                                             <Maximize2 size={14} /> 2D Graph
                                         </button>
                                         <button
+                                            onClick={() => setViewMode("galaxy")}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === "galaxy" ? "bg-white text-black shadow-[0_0_15px_rgba(59,130,246,0.3)]" : "text-zinc-500 hover:text-white"}`}
+                                        >
+                                            <Sparkles size={14} className={viewMode === 'galaxy' ? 'text-blue-500' : ''} /> 3D Galaxy
+                                        </button>
+                                        <button
                                             onClick={() => setViewMode("list")}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === "list" ? "bg-white text-black" : "text-zinc-500 hover:text-white"}`}
                                         >
@@ -276,7 +284,23 @@ export default function AnalyzePage() {
                                 <div className="h-[700px] w-full p-4 pt-0">
                                     <div className="h-full w-full rounded-[32px] overflow-hidden bg-zinc-900/20 border border-zinc-900 shadow-2xl relative">
                                         <AnimatePresence mode="wait">
-                                            {viewMode === "list" ? (
+                                            {viewMode === "graph" ? (
+                                                <motion.div key="graph" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
+                                                    <RepoSkeletonGraph
+                                                        initialNodes={graphData.nodes}
+                                                        initialEdges={graphData.edges}
+                                                        onFileClick={handleFileClick}
+                                                        searchQuery={graphSearch}
+                                                    />
+                                                </motion.div>
+                                            ) : viewMode === 'galaxy' ? (
+                                                <motion.div key="galaxy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full bg-black">
+                                                    <RepoGalaxyView
+                                                        nodes={graphData.nodes}
+                                                        edges={graphData.edges}
+                                                    />
+                                                </motion.div>
+                                            ) : (
                                                 <motion.div
                                                     key="list"
                                                     initial={{ opacity: 0 }}
@@ -300,15 +324,6 @@ export default function AnalyzePage() {
                                                             {node.type === 'file' && <div className="px-3 py-1 rounded-lg bg-blue-500/10 text-blue-500 text-[8px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Preview Code</div>}
                                                         </div>
                                                     ))}
-                                                </motion.div>
-                                            ) : (
-                                                <motion.div key="graph" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="h-full w-full">
-                                                    <RepoSkeletonGraph
-                                                        initialNodes={graphData.nodes}
-                                                        initialEdges={graphData.edges}
-                                                        onFileClick={handleFileClick}
-                                                        searchQuery={graphSearch}
-                                                    />
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>

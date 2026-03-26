@@ -33,6 +33,8 @@ router.post('/sync', authenticate, async (req: AuthRequest, res) => {
                 displayName: firebaseUser.name || '',
                 photoURL: firebaseUser.picture || '',
                 skills: [],
+                goals: [],
+                onboarded: false,
             });
 
             await user.save();
