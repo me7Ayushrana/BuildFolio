@@ -16,53 +16,49 @@ import CreatePostModal from '@/components/CreatePostModal'; // This import will 
 import FollowButton from '@/components/FollowButton';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 export default function HomePage() {
-  const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Show premium data immediately — never wait for API
+  const premiumWithCounts = PREMIUM_PROJECTS.map(p => ({
+    ...p,
+    likesCount: p.likes?.length || 0,
+    commentsCount: p.comments?.length || 0,
+  }));
+
+  const [projects, setProjects] = useState<any[]>(premiumWithCounts);
+  const [loading, setLoading] = useState(false); // false = instant render
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'global' | 'following'>('global');
-  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<any[]>(PREMIUM_USERS.slice(0, 5));
   const { user, token, dbUser } = useAuth();
 
   const fetchProjects = async (tab: 'global' | 'following') => {
-    setLoading(true);
     try {
       const endpoint = tab === 'global'
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`
         : `${process.env.NEXT_PUBLIC_BACKEND_URL}/social/feed/following`;
 
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      const res = await axios.get(endpoint, config);
+      // 5-second timeout — don't wait for Render cold start
+      const res = await axios.get(endpoint, { ...config, timeout: 5000 });
 
       if (res.data && res.data.length > 0) {
         setProjects(res.data);
-      } else {
-        // Fallback to premium data with derived counts
-        setProjects(tab === 'global' ? PREMIUM_PROJECTS.map(p => ({
-          ...p,
-          likesCount: p.likes?.length || 0,
-          commentsCount: p.comments?.length || 0,
-        })) : []);
       }
+      // If API returns empty, keep the premium data that's already showing
     } catch (err) {
-      console.error('Error fetching projects:', err);
-      setProjects(tab === 'global' ? PREMIUM_PROJECTS.map(p => ({
-        ...p,
-        likesCount: p.likes?.length || 0,
-        commentsCount: p.comments?.length || 0,
-      })) : []);
-    } finally {
-      setLoading(false);
+      // Silently fail — premium data is already showing
+      console.log('API not ready, showing showcase data');
     }
   };
 
   const fetchSuggested = async () => {
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/trending`);
-      setSuggestedUsers(res.data.length > 0 ? res.data : PREMIUM_USERS.slice(0, 5));
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/trending`, { timeout: 5000 });
+      if (res.data.length > 0) setSuggestedUsers(res.data);
     } catch (err) {
-      setSuggestedUsers(PREMIUM_USERS.slice(0, 5));
+      // Keep premium users already showing
     }
   };
 
