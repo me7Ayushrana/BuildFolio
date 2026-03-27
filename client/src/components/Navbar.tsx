@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { User, LogOut, LayoutDashboard, Globe, Zap, Bell, MessageCircle, Sparkles, Rocket, BadgeCheck } from "lucide-react";
+import { UserProfile } from "@/types";
+import { User, LogOut, LayoutDashboard, Zap, Bell, MessageCircle, Sparkles, Rocket, BadgeCheck } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import axios from 'axios';
 import { Search, Loader2 } from 'lucide-react';
@@ -15,7 +16,7 @@ export default function Navbar() {
     const { user, dbUser, logout, loginAsDev } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [searchResults, setSearchResults] = useState<UserProfile[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -54,7 +55,7 @@ export default function Navbar() {
 
         const timeoutId = setTimeout(searchUsers, 300);
         return () => clearTimeout(timeoutId);
-    }, [searchQuery]);
+    }, [searchQuery, API_URL]);
 
     // Auto-trigger Onboarding Flow
     useEffect(() => {

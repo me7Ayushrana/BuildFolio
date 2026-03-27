@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { X, User as UserIcon, BadgeCheck, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import FollowButton from './FollowButton';
+import { UserProfile } from '@/types';
 
 interface UserListModalProps {
     isOpen: boolean;
@@ -17,16 +18,10 @@ interface UserListModalProps {
 }
 
 export default function UserListModal({ isOpen, onClose, title, userId, type }: UserListModalProps) {
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (isOpen && userId) {
-            fetchUsers();
-        }
-    }, [isOpen, userId, type]);
-
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setLoading(true);
         try {
             const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/social/${type}/${userId}`);
@@ -36,7 +31,13 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }: 
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, type]);
+
+    useEffect(() => {
+        if (isOpen && userId) {
+            fetchUsers();
+        }
+    }, [isOpen, userId, fetchUsers]);
 
     return (
         <AnimatePresence>
@@ -93,7 +94,7 @@ export default function UserListModal({ isOpen, onClose, title, userId, type }: 
                                                     <span className="text-[10px] text-slate-500 font-mono truncate">@{user.username}</span>
                                                 </div>
                                             </Link>
-                                            <FollowButton targetUserId={user._id} variant="mini" />
+                                            <FollowButton targetUserId={user._id || ''} variant="mini" />
                                         </div>
                                     ))}
                                 </div>

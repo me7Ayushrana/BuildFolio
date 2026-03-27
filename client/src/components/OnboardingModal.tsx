@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { UserProfile } from "@/types";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, AtSign, Check, X, Loader2, Sparkles, Rocket, Target, Code2, Heart, Zap } from "lucide-react";
@@ -65,8 +66,8 @@ export default function OnboardingModal({ isOpen, onClose }: { isOpen: boolean; 
             try {
                 await axios.get(`${API_URL}/users/${username}`);
                 setIsAvailable(false);
-            } catch (err: any) {
-                if (err.response?.status === 404) {
+            } catch (err) {
+                if (axios.isAxiosError(err) && err.response?.status === 404) {
                     setIsAvailable(true);
                 }
             } finally {
@@ -76,7 +77,7 @@ export default function OnboardingModal({ isOpen, onClose }: { isOpen: boolean; 
 
         const timeoutId = setTimeout(checkUsername, 500);
         return () => clearTimeout(timeoutId);
-    }, [username, dbUser]);
+    }, [username, dbUser, API_URL]);
 
     const handleGoalToggle = (goal: string) => {
         setGoals(prev => prev.includes(goal) ? prev.filter(g => g !== goal) : [...prev, goal]);
@@ -116,8 +117,12 @@ export default function OnboardingModal({ isOpen, onClose }: { isOpen: boolean; 
             );
             onClose();
             window.location.reload();
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Failed to sync profile. Try again.");
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || "Failed to sync profile. Try again.");
+            } else {
+                setError("Failed to sync profile. Try again.");
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -359,7 +364,7 @@ export default function OnboardingModal({ isOpen, onClose }: { isOpen: boolean; 
                                         )}
 
                                         <p className="text-sm text-zinc-400 font-medium leading-relaxed italic">
-                                            "{bio || "Your technical mission statement will reflect here..."}"
+                                            &quot;{bio || "Your technical mission statement will reflect here..."}&quot;
                                         </p>
 
                                         <div className="flex flex-wrap gap-2">

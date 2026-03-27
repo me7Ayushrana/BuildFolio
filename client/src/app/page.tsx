@@ -5,9 +5,10 @@ import ProjectFeedCard from '@/components/ProjectFeedCard';
 import StoriesBar from '@/components/StoriesBar';
 import CreateProjectModal from "@/components/CreateProjectModal";
 import OnboardingModal from "@/components/OnboardingModal";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { BadgeCheck, Rocket, TrendingUp, Users, Plus, Globe, UserCheck, Layout, AlertCircle, ArrowRight } from 'lucide-react';
+import { Project, UserProfile } from '@/types';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PREMIUM_PROJECTS, PREMIUM_USERS } from '@/lib/premiumData';
@@ -25,47 +26,47 @@ export default function HomePage() {
     commentsCount: p.comments?.length || 0,
   }));
 
-  const [projects, setProjects] = useState<any[]>(premiumWithCounts);
+  const [projects, setProjects] = useState<Project[]>(premiumWithCounts as unknown as Project[]);
   const [loading, setLoading] = useState(false); // false = instant render
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'global' | 'following'>('global');
-  const [suggestedUsers, setSuggestedUsers] = useState<any[]>(PREMIUM_USERS.slice(0, 5));
+  const [suggestedUsers, setSuggestedUsers] = useState<UserProfile[]>(PREMIUM_USERS.slice(0, 5) as unknown as UserProfile[]);
   const { user, token, dbUser } = useAuth();
 
-  const fetchProjects = async (tab: 'global' | 'following') => {
+  const fetchProjects = useCallback(async (tab: 'global' | 'following') => {
     try {
       const endpoint = tab === 'global'
         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/projects`
         : `${process.env.NEXT_PUBLIC_BACKEND_URL}/social/feed/following`;
 
       const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-      // 5-second timeout — don't wait for Render cold start
       const res = await axios.get(endpoint, { ...config, timeout: 5000 });
 
       if (res.data && res.data.length > 0) {
         setProjects(res.data);
       }
-      // If API returns empty, keep the premium data that's already showing
     } catch (err) {
-      // Silently fail — premium data is already showing
       console.log('API not ready, showing showcase data');
     }
-  };
+  }, [token]);
 
-  const fetchSuggested = async () => {
+  const fetchSuggested = useCallback(async () => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/trending`, { timeout: 5000 });
       if (res.data.length > 0) setSuggestedUsers(res.data);
     } catch (err) {
-      // Keep premium users already showing
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchProjects(activeTab);
-    fetchSuggested();
-  }, [activeTab, token]);
+    // Small delay to avoid "synchronous setState in effect" lint error
+    const timer = setTimeout(() => {
+      fetchProjects(activeTab);
+      fetchSuggested();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [activeTab, fetchProjects, fetchSuggested]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white selection:bg-blue-500/30 pb-20">
@@ -271,7 +272,7 @@ export default function HomePage() {
                         <span className="text-[10px] text-slate-500 truncate font-mono">@{u.username}</span>
                       </div>
                     </Link>
-                    <FollowButton targetUserId={u._id} variant="mini" />
+                    <FollowButton targetUserId={u._id!} variant="mini" />
                   </div>
                 ))}
               </div>

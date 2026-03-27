@@ -7,36 +7,11 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import { useAuth } from '@/context/AuthContext';
+import { Project, UserProfile, Comment as GlobalComment } from '@/types';
 import FollowButton from './FollowButton';
 
-interface Comment {
-    _id?: string;
-    userId: {
-        _id: string;
-        username: string;
-        displayName: string;
-        photoURL?: string;
-    };
-    text: string;
-    createdAt: string;
-}
-
 interface ProjectFeedCardProps {
-    project: {
-        _id: string;
-        userId: any;
-        title: string;
-        description: string;
-        techStack: string[];
-        imageUrl?: string;
-        githubLink?: string;
-        isLiked?: boolean;
-        isSaved?: boolean;
-        likesCount?: number;
-        commentsCount?: number;
-        comments?: Comment[];
-        createdAt: string;
-    };
+    project: Project;
 }
 
 const isIconicDeveloper = (id: string) => {
@@ -44,14 +19,13 @@ const isIconicDeveloper = (id: string) => {
     return iconicIds.includes(id);
 };
 
-export default function ProjectFeedCard({ project: initialProject }: ProjectFeedCardProps) {
-    const [project, setProject] = useState(initialProject);
-    const [isLiked, setIsLiked] = useState(initialProject.isLiked || false);
-    const [likesCount, setLikesCount] = useState(initialProject.likesCount || 0);
-    const [isSaved, setIsSaved] = useState(initialProject.isSaved || false);
+export default function ProjectFeedCard({ project }: ProjectFeedCardProps) {
+    const [isLiked, setIsLiked] = useState(project.isLiked || false);
+    const [likesCount, setLikesCount] = useState(project.likesCount || 0);
+    const [isSaved, setIsSaved] = useState(project.isSaved || false);
     const [showComments, setShowComments] = useState(false);
     const [commentText, setCommentText] = useState('');
-    const [localComments, setLocalComments] = useState<Comment[]>(initialProject.comments || []);
+    const [localComments, setLocalComments] = useState<GlobalComment[]>(project.comments || []);
     const { user, token } = useAuth();
 
     const toggleLike = async () => {
@@ -126,9 +100,9 @@ export default function ProjectFeedCard({ project: initialProject }: ProjectFeed
         }
     };
 
-    const authorId = typeof project.userId === 'object' ? project.userId?._id : project.userId;
-    const authorUsername = typeof project.userId === 'object' ? project.userId?.username : 'dev';
-    const authorDisplayName = typeof project.userId === 'object' ? project.userId?.displayName : 'Elite Developer';
+    const authorId = String((typeof project.userId === 'object' ? project.userId?._id : project.userId) || '');
+    const authorUsername = (typeof project.userId === 'object' ? project.userId?.username : 'dev') || 'dev';
+    const authorDisplayName = (typeof project.userId === 'object' ? project.userId?.displayName : 'Elite Developer') || 'Elite Developer';
     const authorPhoto = typeof project.userId === 'object' ? project.userId?.photoURL : null;
 
     return (

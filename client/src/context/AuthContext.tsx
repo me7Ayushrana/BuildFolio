@@ -13,10 +13,12 @@ import {
 } from "firebase/auth";
 import { auth, googleProvider, githubProvider } from "@/lib/firebase";
 import axios from "axios";
+import { UserProfile } from "@/types";
+
 
 interface AuthContextType {
     user: User | null;
-    dbUser: any | null;
+    dbUser: UserProfile | null;
     token: string | null;
     loading: boolean;
     loginWithGoogle: () => Promise<void>;
@@ -34,7 +36,7 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5001/ap
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
-    const [dbUser, setDbUser] = useState<any | null>(null);
+    const [dbUser, setDbUser] = useState<UserProfile | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -195,16 +197,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 email: "dev@buildfolio.com",
                 displayName: res.data.displayName || "Dev Engineer",
                 photoURL: res.data.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"
-            } as any);
+            } as unknown as User);
         } catch (err) {
             console.error("Dev login fetch failed:", err);
-            setDbUser({ username: "dev", displayName: "Dev Engineer" });
+            setDbUser({ _id: "dev-id", uid: "dev-uid", username: "dev", displayName: "Dev Engineer", email: "dev@buildfolio.com" });
             setUser({
                 uid: "dev-uid",
                 email: "dev@buildfolio.com",
                 displayName: "Dev Engineer",
                 photoURL: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"
-            } as any);
+            } as unknown as User);
         }
         setLoading(false);
     };

@@ -29,10 +29,34 @@ import { generateGraphData } from "@/lib/graphUtils";
 
 const COLORS = ["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#6366f1"];
 
+interface RepoData {
+    owner: string;
+    repo: string;
+    name: string;
+    fullName: string;
+    description: string;
+    stars: number;
+    forks: number;
+    issues: number;
+    updatedAt: string;
+    languages: Array<{ name: string; value: number }>;
+    health: number;
+    activity: number;
+}
+
+interface GraphNode {
+    id: string;
+    type: 'folder' | 'file';
+    data: {
+        label: string;
+        path: string;
+    };
+}
+
 export default function AnalyzePage() {
     const [repoUrl, setRepoUrl] = useState("");
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<RepoData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<"list" | "graph" | "galaxy">("graph");
     const [graphData, setGraphData] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
@@ -103,12 +127,13 @@ export default function AnalyzePage() {
         setFileContent("");
 
         try {
+            if (!data) return;
             const { owner, repo } = data;
             const path = node.data.path;
             const res = await axios.get(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`);
             // GitHub contents API returns base64 for files
             if (res.data.content) {
-                setFileContent(atob(res.data.content.replace(/\n/g, '')));
+                setFileContent(atob((res.data.content as string).replace(/\n/g, '')));
             } else {
                 setFileContent("// Unable to load content (possibly too large)");
             }
@@ -220,7 +245,7 @@ export default function AnalyzePage() {
                                                     paddingAngle={8}
                                                     dataKey="value"
                                                 >
-                                                    {data.languages.map((entry: any, index: number) => (
+                                                    {data.languages.map((_entry: { name: string; value: number }, index: number) => (
                                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                                     ))}
                                                 </Pie>

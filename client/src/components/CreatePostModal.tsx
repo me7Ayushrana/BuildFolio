@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 interface CreatePostModalProps {
     isOpen: boolean;
@@ -25,16 +27,42 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
         imageUrl: ""
     });
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-                setFormData({ ...formData, imageUrl: reader.result as string });
-            };
-            reader.readAsDataURL(file);
+        if (!file) return;
+
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        try {
+            const storageRef = ref(storage, `posts/${Date.now()}_${file.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    setUploadProgress(progress);
+                },
+                (err) => {
+                    console.error(err);
+                    toast.error("Media synchronization failed");
+                    setIsUploading(false);
+                },
+                async () => {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    setImagePreview(downloadURL);
+                    setFormData({ ...formData, imageUrl: downloadURL });
+                    setIsUploading(false);
+                    toast.success("Media Uplink Established");
+                }
+            );
+        } catch (err) {
+            console.error("Storage Error:", err);
+            toast.error("Peripheral storage connection lost");
+            setIsUploading(false);
         }
     };
 
@@ -112,18 +140,34 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
                                     </button>
                                 </>
                             ) : (
-                                <div className="text-center p-8">
-                                    <div className="mx-auto h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
-                                        <Upload size={24} className="text-zinc-400" />
-                                    </div>
-                                    <p className="text-sm font-bold text-zinc-400">Click to upload image</p>
-                                    <p className="text-xs text-zinc-600 mt-1 uppercase tracking-tighter">JPG, PNG or GIF (Max 5MB)</p>
-                                    <input
-                                        type="file"
-                                        onChange={handleImageChange}
-                                        className="absolute inset-0 opacity-0 cursor-pointer"
-                                        accept="image/*"
-                                    />
+                                <div className="text-center p-8 w-full h-full flex flex-col items-center justify-center">
+                                    {isUploading ? (
+                                        <div className="flex flex-col items-center gap-4">
+                                            <div className="relative w-16 h-16">
+                                                <svg className="w-full h-full -rotate-90">
+                                                    <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" className="text-zinc-800" />
+                                                    <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="4" fill="transparent" strokeDasharray="175.9" strokeDashoffset={175.9 - (175.9 * uploadProgress) / 100} className="text-blue-500 transition-all duration-300" />
+                                                </svg>
+                                                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white">{Math.round(uploadProgress)}%</div>
+                                            </div>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 animate-pulse">Syncing Neural Memory...</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="mx-auto h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center mb-4">
+                                                <Upload size={24} className="text-zinc-400" />
+                                            </div>
+                                            <p className="text-sm font-bold text-zinc-400">Click to upload image</p>
+                                            <p className="text-xs text-zinc-600 mt-1 uppercase tracking-tighter">JPG, PNG or GIF (Max 5MB)</p>
+                                            <input
+                                                type="file"
+                                                onChange={handleImageChange}
+                                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                                accept="image/*"
+                                                disabled={isUploading}
+                                            />
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>

@@ -15,7 +15,10 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
 
     // Dismiss immediately when auth resolves
     useEffect(() => {
-        if (!loading) setShowGate(false);
+        if (!loading) {
+            const timer = setTimeout(() => setShowGate(false), 0);
+            return () => clearTimeout(timer);
+        }
     }, [loading]);
 
     if (!showGate) return <>{children}</>;

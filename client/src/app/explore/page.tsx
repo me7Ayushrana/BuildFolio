@@ -7,13 +7,15 @@ import { Search, Filter, Heart, MessageCircle, Zap, User, BadgeCheck, Sparkles, 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PREMIUM_PROJECTS } from "@/lib/premiumData";
+import { Project, UserProfile } from "@/types";
+import Image from "next/image";
 
 const ROLES = ["Frontend", "Backend", "Fullstack", "AI / ML", "UI/UX", "Mobile", "DevOps"];
 const TECH = ["React", "Next.js", "Node.js", "TypeScript", "Tailwind", "Rust", "Go", "Python"];
 
 export default function ExplorePage() {
-    const [projects, setProjects] = useState<any[]>([]);
-    const [builders, setBuilders] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [builders, setBuilders] = useState<UserProfile[]>([]);
     const [loading, setLoading] = useState(true);
     const [techFilter, setTechFilter] = useState("");
     const [roleFilter, setRoleFilter] = useState("");
@@ -47,17 +49,17 @@ export default function ExplorePage() {
             if (res.data.projects && res.data.projects.length > 0) {
                 setProjects(res.data.projects);
             } else {
-                setProjects(PREMIUM_PROJECTS);
+                setProjects(PREMIUM_PROJECTS as unknown as Project[]);
             }
         } catch (error) {
             console.error("Error fetching projects, showing premium fallback:", error);
-            setProjects(PREMIUM_PROJECTS);
+            setProjects(PREMIUM_PROJECTS as unknown as Project[]);
         } finally {
             setLoading(false);
         }
     };
 
-    const filteredProjects = projects.filter((p: any) =>
+    const filteredProjects = projects.filter((p: Project) =>
         p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -121,9 +123,14 @@ export default function ExplorePage() {
                                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 <Link href={`/profile/${builder.username}`} className="relative z-10 flex flex-col items-center text-center">
                                     <div className="w-20 h-20 rounded-2xl p-0.5 bg-gradient-to-tr from-blue-500 to-indigo-600 mb-4 ring-4 ring-zinc-950">
-                                        <div className="w-full h-full rounded-2xl bg-zinc-900 overflow-hidden">
+                                        <div className="w-full h-full rounded-2xl bg-zinc-900 overflow-hidden relative">
                                             {builder.photoURL ? (
-                                                <img src={builder.photoURL} alt={builder.displayName || builder.username} className="w-full h-full object-cover" />
+                                                <Image
+                                                    src={builder.photoURL}
+                                                    alt={builder.displayName || builder.username}
+                                                    fill
+                                                    className="object-cover"
+                                                />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-zinc-800 font-black text-2xl uppercase">{builder.username?.[0]}</div>
                                             )}
@@ -211,7 +218,12 @@ export default function ExplorePage() {
                                     <Link href={`/profile/${project.userId?.username}`}>
                                         <div className="absolute inset-0 bg-zinc-950">
                                             {project.imageUrl ? (
-                                                <img src={project.imageUrl} alt={project.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100" />
+                                                <Image
+                                                    src={project.imageUrl}
+                                                    alt={project.title}
+                                                    fill
+                                                    className="object-cover transition-transform duration-700 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                                                />
                                             ) : (
                                                 <div className="flex h-full w-full items-center justify-center">
                                                     <Zap size={48} className="text-zinc-900 fill-zinc-900" />

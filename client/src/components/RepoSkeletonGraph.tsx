@@ -15,7 +15,7 @@ import { useEffect, useCallback, useState } from "react";
 import { Folder, FileCode, Search, Maximize2, Zap, ArrowRight, Layers } from "lucide-react";
 
 const nodeTypes = {
-    folder: ({ data }: any) => (
+    folder: ({ data }: { data: { label: string; selected?: boolean; hasChildren?: boolean } }) => (
         <div className={`px-4 py-2 rounded-xl bg-zinc-900 border ${data.selected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-blue-500/30'} text-white min-w-[140px] shadow-2xl flex items-center justify-between gap-2 group transition-all`}>
             <div className="flex items-center gap-2 overflow-hidden">
                 <Folder size={16} className={`transition-colors ${data.selected ? 'text-blue-400' : 'text-blue-500 fill-blue-500/10'}`} />
@@ -24,7 +24,7 @@ const nodeTypes = {
             {data.hasChildren && <ArrowRight size={10} className="text-zinc-700 group-hover:text-blue-500 transition-colors" />}
         </div>
     ),
-    file: ({ data }: any) => (
+    file: ({ data }: { data: { label: string; selected?: boolean } }) => (
         <div className={`px-4 py-2 rounded-xl bg-zinc-900 border ${data.selected ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-zinc-800'} text-zinc-400 min-w-[140px] shadow-lg flex items-center gap-2 group transition-all hover:border-zinc-700`}>
             <FileCode size={16} className={`transition-colors ${data.selected ? 'text-blue-400' : 'text-zinc-600'}`} />
             <span className={`text-[10px] truncate transition-colors ${data.selected ? 'text-white font-black' : 'font-bold'}`}>{data.label}</span>
@@ -35,7 +35,7 @@ const nodeTypes = {
 interface RepoSkeletonGraphProps {
     initialNodes: Node[];
     initialEdges: Edge[];
-    onFileClick: (node: any) => void;
+    onFileClick: (node: Node) => void;
     searchQuery: string;
 }
 
@@ -54,7 +54,7 @@ export default function RepoSkeletonGraph({ initialNodes, initialEdges, onFileCl
         })));
     }, [initialNodes, searchQuery, setNodes]);
 
-    const onNodeMouseEnter = useCallback((_: any, node: Node) => {
+    const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: Node) => {
         setHoveredNode(node.id);
     }, []);
 
@@ -62,7 +62,7 @@ export default function RepoSkeletonGraph({ initialNodes, initialEdges, onFileCl
         setHoveredNode(null);
     }, []);
 
-    const onNodeClick = useCallback((_: any, node: Node) => {
+    const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
         if (node.type === 'file') {
             onFileClick(node);
         }

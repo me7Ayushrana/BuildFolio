@@ -4,13 +4,14 @@ import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
-import { Plus, Trash2, Edit2, Github, Globe, Save, X } from "lucide-react";
+import { Plus, Trash2, Github, Globe, Save, X } from "lucide-react";
+import { UserProfile, Project } from "@/types";
 import { toast } from "react-hot-toast";
 
 export default function Dashboard() {
     const { user } = useAuth();
-    const [profile, setProfile] = useState<any>(null);
-    const [projects, setProjects] = useState([]);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [isAddingProject, setIsAddingProject] = useState(false);
     const [newProject, setNewProject] = useState({
         title: "",
@@ -27,13 +28,6 @@ export default function Dashboard() {
         skills: "",
         githubUsername: ""
     });
-
-    useEffect(() => {
-        if (user?.email) {
-            const username = user.email.split('@')[0];
-            fetchProfile(username);
-        }
-    }, [user]);
 
     const fetchProfile = async (username: string) => {
         try {
@@ -52,6 +46,13 @@ export default function Dashboard() {
             console.error("Error fetching dashboard data:", error);
         }
     };
+
+    useEffect(() => {
+        if (user?.email) {
+            const username = user.email.split('@')[0];
+            fetchProfile(username);
+        }
+    }, [user]);
 
     const handleUpdateProfile = async () => {
         try {
@@ -249,7 +250,7 @@ export default function Dashboard() {
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {projects.map((project: any) => (
+                            {projects.map((project: Project) => (
                                 <div key={project._id} className="group relative rounded-2xl border border-zinc-800 bg-zinc-900/30 p-6 flex flex-col gap-4">
                                     <div className="flex justify-between items-start">
                                         <h3 className="font-bold text-white">{project.title}</h3>
