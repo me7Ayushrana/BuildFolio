@@ -100,11 +100,16 @@ export default function CreateProjectModal({ isOpen, onClose }: { isOpen: boolea
                                     </div>
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600 ml-2">Step {step} of 3</span>
                                 </div>
-                                <h2 className="text-3xl font-black text-white tracking-tighter">
-                                    {step === 1 && "The Concept"}
-                                    {step === 2 && "The Visuals"}
-                                    {step === 3 && "Final Mission Check"}
+                                <h2 className="text-4xl font-black text-white tracking-tighter italic">
+                                    {step === 1 && "The Genesis"}
+                                    {step === 2 && "Visual Synchronization"}
+                                    {step === 3 && "Final Trajectory Check"}
                                 </h2>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2">
+                                    {step === 1 && "Define the core architectural breakthrough."}
+                                    {step === 2 && "Establish the visual identity for global discovery."}
+                                    {step === 3 && "Finalize metadata and initiate deployment."}
+                                </p>
                             </div>
 
                             <div className="space-y-8">
@@ -303,46 +308,88 @@ export default function CreateProjectModal({ isOpen, onClose }: { isOpen: boolea
                         </div>
 
                         {/* Right Side: Live Preview */}
-                        <div className="hidden md:flex flex-1 p-12 items-center justify-center bg-zinc-900/50 relative overflow-hidden group">
+                        <div className="hidden md:flex flex-1 p-12 items-center justify-center bg-zinc-900/10 relative overflow-hidden group">
                             {/* Animated Background Gradients */}
                             <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -mr-64 -mt-64 group-hover:bg-blue-500/20 transition-colors duration-1000" />
                             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] -ml-64 -mb-64 group-hover:bg-purple-500/20 transition-colors duration-1000" />
 
                             <div className="w-full max-w-sm relative z-10">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600 block mb-6 text-center">Live Holographic Preview</span>
+                                <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full -z-10 animate-pulse" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-blue-500/60 block mb-8 text-center animate-pulse">Holographic Preview Rendering</span>
 
-                                {/* Card Mockup */}
-                                <div className="bg-zinc-950/80 border border-white/10 rounded-[2rem] overflow-hidden backdrop-blur-3xl shadow-2xl">
-                                    <div className="p-4 border-b border-white/5 flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-zinc-800" />
-                                        <div className="h-2 w-24 bg-zinc-800 rounded" />
+                                {/* Card Mockup - Premium Overhaul */}
+                                <motion.div
+                                    layout
+                                    className="bg-zinc-950/40 border border-white/10 rounded-[2.5rem] overflow-hidden backdrop-blur-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] group/card hover:border-blue-500/30 transition-all duration-700"
+                                >
+                                    <div className="p-5 border-b border-white/5 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20" />
+                                            <div className="space-y-1">
+                                                <div className="h-1.5 w-20 bg-zinc-800 rounded-full overflow-hidden">
+                                                    <motion.div initial={{ width: 0 }} animate={{ width: '100%' }} transition={{ duration: 2, repeat: Infinity }} className="h-full bg-blue-500" />
+                                                </div>
+                                                <div className="h-1 w-12 bg-zinc-900 rounded-full" />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-1">
+                                            <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                                            <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                                            <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                                        </div>
                                     </div>
-                                    <div className="aspect-[16/10] bg-zinc-900 relative overflow-hidden">
+
+                                    <div className="aspect-[16/10] bg-black relative overflow-hidden">
                                         {imageUrl ? (
-                                            <Image
-                                                src={imageUrl}
-                                                alt={title || "Project Preview"}
-                                                fill
-                                                className="w-full h-full object-cover"
-                                            />
+                                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
+                                                <Image
+                                                    src={imageUrl}
+                                                    alt={title || "Project Preview"}
+                                                    fill
+                                                    className="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-[2s]"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                                            </motion.div>
                                         ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center text-zinc-800 font-black uppercase tracking-widest text-[10px]">
-                                                No Media Connection
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                {/* Holographic Pulse Empty State */}
+                                                <div className="relative">
+                                                    <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+                                                    <div className="w-24 h-24 rounded-full border border-blue-500/30 flex items-center justify-center relative">
+                                                        <div className="absolute inset-0 border-t border-blue-400 rounded-full animate-spin duration-[3s]" />
+                                                        <Rocket size={32} className="text-blue-500 animate-bounce" />
+                                                    </div>
+                                                </div>
+                                                <div className="absolute bottom-8 left-0 right-0 text-center">
+                                                    <p className="text-[9px] font-black text-blue-500/50 uppercase tracking-[0.3em]">No Visual Connection</p>
+                                                </div>
                                             </div>
                                         )}
+
+                                        {/* Dynamic Scan Line */}
+                                        <div className="absolute left-0 right-0 h-[1px] bg-blue-500/30 top-0 animate-scan pointer-events-none shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
                                     </div>
-                                    <div className="p-6 space-y-4">
-                                        <div className="space-y-2">
-                                            <h4 className="text-xl font-black text-white leading-none tracking-tight">{title || "Launch Target Alpha"}</h4>
-                                            <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed">{description || "The technical details of your breakthrough development will appear here..."}</p>
+
+                                    <div className="p-8 space-y-6">
+                                        <div className="space-y-3">
+                                            <h4 className="text-2xl font-black text-white leading-tight tracking-tighter uppercase italic group-hover/card:text-blue-400 transition-colors">
+                                                {title || "Target Alpha"}
+                                            </h4>
+                                            <p className="text-xs text-zinc-500 line-clamp-2 leading-relaxed font-medium italic">
+                                                {description || "Awaiting architectural input..."}
+                                            </p>
                                         </div>
-                                        <div className="flex flex-wrap gap-1">
-                                            {(techStack || "Buildfolio").split(",").map((t, i) => (
-                                                <div key={i} className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/5 text-[8px] font-black text-zinc-500 uppercase tracking-widest">{t.trim() || "?"}</div>
+
+                                        <div className="flex flex-wrap gap-2">
+                                            {(techStack || "???, ???, ???").split(",").map((t, i) => (
+                                                <div key={i} className="px-3 py-1 rounded-full bg-blue-500/5 border border-blue-500/10 text-[8px] font-black text-blue-500/80 uppercase tracking-widest">{t.trim() || "?"}</div>
                                             ))}
                                         </div>
                                     </div>
-                                </div>
+
+                                    {/* Bottom Decorative Element */}
+                                    <div className="h-1 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
+                                </motion.div>
                             </div>
                         </div>
 

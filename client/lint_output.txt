@@ -1,0 +1,188 @@
+
+> client@0.1.0 lint
+> eslint
+
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/analyze/page.tsx
+    3:33  warning  'useEffect' is defined but never used       @typescript-eslint/no-unused-vars
+   13:5   warning  'AlertCircle' is defined but never used     @typescript-eslint/no-unused-vars
+   35:38  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   36:12  warning  'error' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   38:57  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   38:71  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   43:54  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   54:20  warning  '_' is assigned a value but never used      @typescript-eslint/no-unused-vars
+   72:32  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   92:23  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+   99:54  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  223:81  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+  311:81  error    Unexpected any. Specify a different type    @typescript-eslint/no-explicit-any
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/auth/page.tsx
+   9:54  warning  'Sparkles' is defined but never used      @typescript-eslint/no-unused-vars
+  74:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  90:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/dashboard/page.tsx
+    7:24  warning  'Edit2' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   12:12  warning  'profile' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   12:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+   34:13  error    Error: Cannot access variable before it is declared
+
+`fetchProfile` is accessed before it is declared, which prevents the earlier access from updating when this value changes over time.
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/dashboard/page.tsx:34:13
+  32 |         if (user?.email) {
+  33 |             const username = user.email.split('@')[0];
+> 34 |             fetchProfile(username);
+     |             ^^^^^^^^^^^^ `fetchProfile` accessed before it is declared
+  35 |         }
+  36 |     }, [user]);
+  37 |
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/dashboard/page.tsx:38:5
+  36 |     }, [user]);
+  37 |
+> 38 |     const fetchProfile = async (username: string) => {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 39 |         try {
+     | ^^^^^^^^^^^^^
+> 40 |             const res = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/${username}`);
+     …
+     | ^^^^^^^^^^^^^
+> 53 |         }
+     | ^^^^^^^^^^^^^
+> 54 |     };
+     | ^^^^^^^ `fetchProfile` is declared here
+  55 |
+  56 |     const handleUpdateProfile = async () => {
+  57 |         try {  react-hooks/immutability
+   69:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   89:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  104:18  warning  'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+  252:53  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @typescript-eslint/no-explicit-any
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/explore/page.tsx
+    6:18  warning  'Filter' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    6:53  warning  'User' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   15:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   16:46  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   26:8   warning  React Hook useEffect has a missing dependency: 'fetchTrendingBuilders'. Either include it or remove the dependency array                                                                                                                                                                 react-hooks/exhaustive-deps
+   30:8   warning  React Hook useEffect has a missing dependency: 'fetchProjects'. Either include it or remove the dependency array                                                                                                                                                                         react-hooks/exhaustive-deps
+   60:50  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  126:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  205:61  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  214:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/page.tsx
+   10:73  warning  'Layout' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+   15:8   warning  'CreatePostModal' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      @typescript-eslint/no-unused-vars
+   28:44  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   29:19  warning  'setLoading' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   33:56  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-explicit-any
+   50:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   60:14  warning  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+   66:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/page.tsx:66:5
+  64 |
+  65 |   useEffect(() => {
+> 66 |     fetchProjects(activeTab);
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  67 |     fetchSuggested();
+  68 |   }, [activeTab, token]);
+  69 |  react-hooks/set-state-in-effect
+   68:6   warning  React Hook useEffect has a missing dependency: 'fetchProjects'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 react-hooks/exhaustive-deps
+  128:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @next/next/no-img-element
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/app/profile/[username]/page.tsx
+   17:5   warning  'MessageCircle' is defined but never used                                                                            @typescript-eslint/no-unused-vars
+   19:5   warning  'Users' is defined but never used                                                                                    @typescript-eslint/no-unused-vars
+   20:5   warning  'UserPlus' is defined but never used                                                                                 @typescript-eslint/no-unused-vars
+   22:5   warning  'Maximize2' is defined but never used                                                                                @typescript-eslint/no-unused-vars
+   37:44  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   38:46  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   39:40  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   40:56  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   49:59  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   49:73  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   54:8   warning  React Hook useEffect has a missing dependency: 'fetchProfileData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+   89:69  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  126:32  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  291:79  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  327:89  error    Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/AuthGate.tsx
+  18:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/AuthGate.tsx:18:23
+  16 |     // Dismiss immediately when auth resolves
+  17 |     useEffect(() => {
+> 18 |         if (!loading) setShowGate(false);
+     |                       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |     }, [loading]);
+  20 |
+  21 |     if (!showGate) return <>{children}</>;  react-hooks/set-state-in-effect
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/ChatWidget.tsx
+   9:5   warning  'where' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  15:42  warning  'UserIcon' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+  22:16  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  25:80  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  25:97  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  81:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  81:33  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/CreatePostModal.tsx
+    3:20  warning  'useRef' is defined but never used                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+    4:21  warning  'Plus' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+    5:18  warning  'AnimatePresence' is defined but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  105:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  105:37  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/FollowButton.tsx
+  5:20  warning  'UserMinus' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/Hero.tsx
+  4:22  warning  'Github' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/Navbar.tsx
+  128:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  181:45  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/OnboardingModal.tsx
+    4:19  warning  'UserProfile' is defined but never used                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+    7:43  warning  'Sparkles' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    7:76  warning  'Heart' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+  346:53  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  346:53  warning  img elements must have an alt prop, either with meaningful text, or an empty string for decorative images                                                                                                                                                                                jsx-a11y/alt-text
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/RepoGalaxyView.tsx
+  5:38  warning  'Float' is defined but never used                @typescript-eslint/no-unused-vars
+  5:45  warning  'MeshDistortMaterial' is defined but never used  @typescript-eslint/no-unused-vars
+  5:66  warning  'Trail' is defined but never used                @typescript-eslint/no-unused-vars
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/components/RepoSkeletonGraph.tsx
+  15:28  warning  'Search' is defined but never used             @typescript-eslint/no-unused-vars
+  15:36  warning  'Maximize2' is defined but never used          @typescript-eslint/no-unused-vars
+  15:47  warning  'Zap' is defined but never used                @typescript-eslint/no-unused-vars
+  44:19  warning  'setEdges' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/ayushrana/.gemini/antigravity/scratch/buildfolio/client/src/context/AuthContext.tsx
+   85:22  warning  'syncErr' is defined but never used          @typescript-eslint/no-unused-vars
+  138:19  warning  'result' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 90 problems (35 errors, 55 warnings)
+
